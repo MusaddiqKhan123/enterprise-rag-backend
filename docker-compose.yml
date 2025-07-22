@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  db:
+    image: ankane/pgvector
+    container_name: rag_pgvector_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ragdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - rag_pgvector_data:/var/lib/postgresql/data
+
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag_pgvector_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - ollama
+    env_file:
+      - .env  
+      
+
+volumes:
+  rag_pgvector_data:
+  ollama_data: 
